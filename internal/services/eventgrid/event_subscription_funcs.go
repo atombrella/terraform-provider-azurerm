@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-azure-helpers/lang/pointer"
-	"github.com/hashicorp/go-azure-sdk/resource-manager/eventgrid/2022-06-15/eventsubscriptions"
+	"github.com/hashicorp/go-azure-sdk/resource-manager/eventgrid/2023-12-15-preview/eventsubscriptions"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 	"github.com/hashicorp/terraform-provider-azurerm/utils"
 )
@@ -188,6 +188,23 @@ func flattenEventSubscriptionDestinationServiceBusTopicEndpoint(input eventsubsc
 	}
 
 	return ""
+}
+
+func flattenEventSubscriptionDestinationAlertMonitorGroup(input eventsubscriptions.EventSubscriptionDestination) []interface{} {
+	output := make([]interface{}, 0)
+
+	// Wait for this to become available
+	val, ok := input.(eventsubscriptions.zureAlertMonitorGroup)
+	if ok && val.Properties != nil {
+		props := *val.Properties
+		return append(output, map[string]interface{}{
+			"alert_monitor_group_id":            pointer.From(props.ResourceId),
+			"severity":                          int(pointer.From(props.MaxEventsPerBatch)),
+			"preferred_batch_size_in_kilobytes": int(pointer.From(props.PreferredBatchSizeInKilobytes)),
+		})
+	}
+
+	return output
 }
 
 func expandEventSubscriptionStorageQueueEndpoint(input []interface{}) eventsubscriptions.EventSubscriptionDestination {

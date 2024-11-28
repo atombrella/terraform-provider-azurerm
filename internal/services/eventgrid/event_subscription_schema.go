@@ -7,7 +7,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonids"
-	"github.com/hashicorp/go-azure-sdk/resource-manager/eventgrid/2022-06-15/eventsubscriptions"
+	"github.com/hashicorp/go-azure-sdk/resource-manager/eventgrid/2025-02-15/eventsubscriptions"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/eventhub/2021-11-01/eventhubs"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/relay/2021-11-01/hybridconnections"
 	serviceBusQueues "github.com/hashicorp/go-azure-sdk/resource-manager/servicebus/2021-06-01-preview/queues"
@@ -23,6 +23,8 @@ import (
 type EventSubscriptionEndpointType string
 
 const (
+	// EventHubEndpointID ...
+	AlertMonitorGroup EventSubscriptionEndpointType = "alert_monitor_grou"
 	// AzureFunctionEndpoint ...
 	AzureFunctionEndpoint EventSubscriptionEndpointType = "azure_function_endpoint"
 	// EventHubEndpointID ...
@@ -135,6 +137,45 @@ func eventSubscriptionSchemaAzureFunctionEndpoint(conflictsWith []string) *plugi
 					Optional: true,
 				},
 			},
+		},
+	}
+}
+
+func eventSubscriptionSchemaAlertMonitorGroup(conflictsWith []string) *pluginsdk.Schema {
+	return &pluginsdk.Schema{
+		Type:          pluginsdk.TypeList,
+		MaxItems:      1,
+		Optional:      true,
+		ConflictsWith: conflictsWith,
+		Elem: &pluginsdk.Resource{
+			Schema: map[string]*pluginsdk.Schema{
+				"severity": {
+					Type:         pluginsdk.TypeString,
+					Required:     true,
+					ValidateFunc: azure.ValidateResourceID,
+				},
+				"description": {
+					Type:     pluginsdk.TypeString,
+					Optional: true,
+				},
+				"action_groups": {
+					Type:     pluginsdk.TypeList,
+					Optional: false,
+					Elem:     eventSubscriptionSchemaAlertMonitorGroupIDs,
+				},
+			},
+		},
+	}
+}
+
+func eventSubscriptionSchemaAlertMonitorGroupIDs() *pluginsdk.Schema {
+	return &pluginsdk.Schema{
+		Type:     pluginsdk.TypeList,
+		Optional: false,
+		Computed: false,
+		Elem: &pluginsdk.Schema{
+			Type:         pluginsdk.TypeInt,
+			ValidateFunc: validation.IntPositive,
 		},
 	}
 }

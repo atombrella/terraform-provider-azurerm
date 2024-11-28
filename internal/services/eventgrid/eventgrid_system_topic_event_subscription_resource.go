@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/go-azure-helpers/lang/pointer"
 	"github.com/hashicorp/go-azure-helpers/lang/response"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonschema"
-	"github.com/hashicorp/go-azure-sdk/resource-manager/eventgrid/2022-06-15/eventsubscriptions"
+	"github.com/hashicorp/go-azure-sdk/resource-manager/eventgrid/2023-12-15-preview/eventsubscriptions"
 	"github.com/hashicorp/terraform-provider-azurerm/helpers/tf"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
@@ -24,6 +24,7 @@ func possibleSystemTopicEventSubscriptionEndpointTypes() []string {
 	return []string{
 		string(AzureFunctionEndpoint),
 		string(EventHubEndpointID),
+		string(AlertMonitorGroup),
 		string(HybridConnectionEndpointID),
 		string(ServiceBusQueueEndpointID),
 		string(ServiceBusTopicEndpointID),
@@ -72,6 +73,13 @@ func resourceEventGridSystemTopicEventSubscription() *pluginsdk.Resource {
 				utils.RemoveFromStringArray(
 					possibleSystemTopicEventSubscriptionEndpointTypes(),
 					string(AzureFunctionEndpoint),
+				),
+			),
+
+			"alert_monitor_group": eventSubscriptionSchemaAlertMonitorGroup(
+				utils.RemoveFromStringArray(
+					possibleSystemTopicEventSubscriptionEndpointTypes(),
+					string(AlertMonitorGroup),
 				),
 			),
 
@@ -293,6 +301,7 @@ func resourceEventGridSystemTopicEventSubscriptionRead(d *pluginsdk.ResourceData
 				return fmt.Errorf("setting `azure_function_endpoint` for %s: %+v", *id, err)
 			}
 
+			d.Set("alert_monitor_group", flattenEventSubscriptionDestinationAlertMonitorGroup(destination))
 			d.Set("eventhub_endpoint_id", flattenEventSubscriptionDestinationEventHub(destination))
 			d.Set("hybrid_connection_endpoint_id", flattenEventSubscriptionDestinationHybridConnection(destination))
 			d.Set("service_bus_queue_endpoint_id", flattenEventSubscriptionDestinationServiceBusQueueEndpoint(destination))

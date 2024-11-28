@@ -160,6 +160,25 @@ func TestAccEventGridSystemTopicEventSubscription_filter(t *testing.T) {
 	})
 }
 
+func TestAccEventGridSystemTopicEventSubscription_alertMonitorGroup(t *testing.T) {
+	data := acceptance.BuildTestData(t, "azurerm_eventgrid_system_topic_event_subscription", "test")
+	r := EventGridSystemTopicEventSubscriptionResource{}
+
+	data.ResourceTest(t, r, []acceptance.TestStep{
+		{
+			Config: r.filter(data),
+			Check: acceptance.ComposeTestCheckFunc(
+				check.That(data.ResourceName).ExistsInAzure(r),
+				check.That(data.ResourceName).Key("included_event_types.0").HasValue("Microsoft.Storage.BlobCreated"),
+				check.That(data.ResourceName).Key("included_event_types.1").HasValue("Microsoft.Storage.BlobDeleted"),
+				check.That(data.ResourceName).Key("subject_filter.0.subject_ends_with").HasValue(".jpg"),
+				check.That(data.ResourceName).Key("subject_filter.0.subject_begins_with").HasValue("test/test"),
+				check.That(data.ResourceName).Key("advanced_filtering_on_arrays_enabled").HasValue("true"),
+			),
+		},
+		data.ImportStep(),
+	})
+}
 func TestAccEventGridSystemTopicEventSubscription_advancedFilter(t *testing.T) {
 	data := acceptance.BuildTestData(t, "azurerm_eventgrid_system_topic_event_subscription", "test1")
 	r := EventGridSystemTopicEventSubscriptionResource{}

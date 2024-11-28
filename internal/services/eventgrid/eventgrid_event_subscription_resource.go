@@ -100,6 +100,13 @@ func resourceEventGridEventSubscription() *pluginsdk.Resource {
 				),
 			),
 
+			"action_monitor_alert": eventSubscriptionSchemaAlertMonitorGroup(
+				utils.RemoveFromStringArray(
+					possibleEventSubscriptionEndpointTypes(),
+					string(AlertMonitorGroup),
+				),
+			),
+
 			"hybrid_connection_endpoint_id": eventSubscriptionSchemaHybridConnectionEndpointID(
 				utils.RemoveFromStringArray(
 					possibleEventSubscriptionEndpointTypes(),
